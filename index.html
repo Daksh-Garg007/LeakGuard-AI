@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeakGuard AI — Subscription & Payment Leak Detector</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-row">
+    <a href="#top" class="brand">
+      <div class="brand-mark">LG</div>
+      <div class="brand-name">LeakGuard AI</div>
+    </a>
+    <nav class="nav-right">
+      <ul class="nav-links">
+        <li><a href="#problem">Problem</a></li>
+        <li><a href="#how">How it works</a></li>
+      </ul>
+      <a href="#statementCard" class="nav-cta">Scan a statement</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap" id="top">
+
+  <section class="hero" id="dashboard-anchor">
+    <div>
+      <div class="kicker">Subscription &amp; Payment Leak Detector</div>
+      <h1 class="headline">Find where your money is<br><em>quietly leaking.</em></h1>
+      <p class="sub">Upload a bank statement. LeakGuard finds forgotten subscriptions, silent price hikes, and wasted spend — in under a minute.</p>
+      <div class="stat-strip">
+        <div><div class="num" id="statSignals">0</div><div class="lbl">Signals tracked</div></div>
+        <div><div class="num lime" id="statSavings">₹0</div><div class="lbl">Avg. yearly leak</div></div>
+        <div><div class="num">&lt;60s</div><div class="lbl">To full report</div></div>
+      </div>
+      <div class="trust-row">
+        <span class="trust-pill"><span class="dot"></span>No signup required</span>
+        <span class="trust-pill"><span class="dot"></span>Nothing stored</span>
+        <span class="trust-pill"><span class="dot"></span>Works with any bank</span>
+      </div>
+    </div>
+
+    <div class="statement-panel">
+    <div class="statement-card" id="statementCard">
+      <div class="statement-head">
+        <div class="head-left">
+          <span class="t">Bank Statement</span>
+        </div>
+        <span class="t2" id="today-date"></span>
+      </div>
+
+      <div class="ingest-tabs">
+        <div class="ingest-tab active" data-tab="upload">Upload CSV</div>
+        <div class="ingest-tab" data-tab="paste">Paste Text</div>
+        <div class="ingest-tab" data-tab="sample">⚡Instant Demo</div>
+      </div>
+
+      <div class="ingest-panel active" id="panel-upload">
+        <div class="drop" id="dropZone">
+          <div class="icon">↥</div>
+          <div class="main-txt">Drop your CSV statement</div>
+          <div class="sub-txt">or click to browse — Date, Description, Amount</div>
+        </div>
+        <input type="file" id="fileInput" accept=".csv,text/csv">
+      </div>
+
+      <div class="ingest-panel" id="panel-paste">
+        <textarea class="paste-box" id="pasteBox" placeholder="Date,Description,Amount
+2026-04-03,NETFLIX.COM,649
+2026-04-05,SPOTIFY INDIA,119"></textarea>
+        <div class="paste-hint">Same Date, Description, Amount format.</div>
+        <button class="btn btn-ghost" id="usePasteBtn" style="margin-top:-6px;">Use this text →</button>
+      </div>
+
+      <div class="ingest-panel" id="panel-sample">
+        <div class="sub-txt" style="margin-bottom:12px; color:var(--muted);">A 5-month, 7-merchant sample statement.</div>
+        <button class="btn btn-ghost" id="sampleBtn" style="margin-top:0;">Load sample →</button>
+        <button class="btn btn-ghost" id="downloadSample">Download as CSV</button>
+      </div>
+
+      <div class="filename" id="filename"></div>
+      <div class="round2-note">PDF support is coming soon — CSV and paste are fully supported today.</div>
+      <button class="btn btn-primary" id="analyzeBtn" disabled>Analyze statement</button>
+
+      <div class="privacy-badge">
+        <span class="lock">◉</span>
+        <span>Processed in memory only. Nothing is stored.</span>
+      </div>
+
+      <div class="proc" id="proc">
+        <div class="proc-step" data-step="0"><div class="proc-dot"></div> Extracting transactions…</div>
+        <div class="proc-step" data-step="1"><div class="proc-dot"></div> Normalizing merchant names…</div>
+        <div class="proc-step" data-step="2"><div class="proc-dot"></div> Detecting recurring subscriptions (~30 day interval)…</div>
+        <div class="proc-step" data-step="3"><div class="proc-dot"></div> Checking for silent price hikes…</div>
+        <div class="proc-step" data-step="4"><div class="proc-dot"></div> Calculating Leak Score…</div>
+        <div class="proc-step" data-step="5"><div class="proc-dot"></div> Generating AI recommendations…</div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <div id="dashboard">
+
+    <div class="section-label">Overview</div>
+    <div class="metrics">
+      <div class="card gauge-card">
+        <div class="gauge-wrap">
+          <svg width="112" height="112" viewBox="0 0 118 118">
+            <circle cx="59" cy="59" r="50" fill="none" stroke="var(--border)" stroke-width="10"/>
+            <circle id="gaugeArc" cx="59" cy="59" r="50" fill="none" stroke="var(--lime)" stroke-width="10" stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="314"/>
+          </svg>
+          <div class="gauge-num">
+            <div class="n" id="leakScoreNum">0</div>
+            <div class="d">/ 100</div>
+          </div>
+        </div>
+        <div class="gauge-info">
+          <div class="t">Leak Score</div>
+          <div class="v" id="leakScoreLabel">Calculating…</div>
+          <div class="desc">Higher = more silent leaks found.</div>
+        </div>
+      </div>
+
+      <div class="card metric-simple">
+        <div class="t">Potential savings</div>
+        <div class="v lime" id="savingsNum">₹0</div>
+        <div class="sub2">per year, if acted on</div>
+      </div>
+
+      <div class="card metric-simple">
+        <div class="t">Monthly subscriptions</div>
+        <div class="v" id="monthlySpendNum">₹0</div>
+        <div class="sub2" id="subCountNote">across 0 subscriptions</div>
+      </div>
+    </div>
+
+    <div class="section-label">Subscriptions</div>
+    <div class="two-col">
+      <div class="card">
+        <div class="chart-title">Recurring subscriptions</div>
+        <div id="subList"></div>
+      </div>
+    </div>
+
+    <div class="section-label">Spend breakdown</div>
+    <div class="chart-grid">
+      <div class="card chart-card">
+        <div class="chart-title">By category</div>
+        <div class="chart-frame"><canvas id="pieChart"></canvas></div>
+      </div>
+      <div class="card chart-card">
+        <div class="chart-title">Monthly trend</div>
+        <div class="chart-frame"><canvas id="trendChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section-label">Renewals &amp; alerts</div>
+    <div class="chart-grid">
+      <div class="card">
+        <div class="chart-title">Upcoming renewals</div>
+        <div id="renewalList"></div>
+      </div>
+      <div class="card" id="alertsCard">
+        <div class="chart-title">Price alerts</div>
+        <div id="alertsList"></div>
+      </div>
+    </div>
+
+    <div class="section-label">Recommendations</div>
+    <div class="card">
+      <div class="rec-list" id="recList"></div>
+      <div class="ai-note">Generated from your merchant &amp; price history.</div>
+    </div>
+
+  </div>
+
+  <section class="problem-section" id="problem">
+    <div class="section-label" style="margin:36px 0 16px;">Why money leaks</div>
+    <div class="problem-grid">
+      <div class="card problem-card">
+        <div class="problem-icon">↻</div>
+        <div class="problem-title">Subscription creep</div>
+        <div class="problem-desc">Forgotten trials and unused plans renew quietly, month after month.</div>
+      </div>
+      <div class="card problem-card">
+        <div class="problem-icon">↑</div>
+        <div class="problem-title">Silent price hikes</div>
+        <div class="problem-desc">Rates rise — ₹499 → ₹649 — with the notice buried in an email you never open.</div>
+      </div>
+      <div class="card problem-card">
+        <div class="problem-icon">≡</div>
+        <div class="problem-title">Unreadable statements</div>
+        <div class="problem-desc">NETFLIX.COM, NETFLIX INDIA — same charge, different names, easy to miss.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="arch-section" id="how">
+    <div class="section-label">How it works</div>
+    <div class="arch-row">
+      <div class="card arch-card">
+        <div class="arch-num">01</div>
+        <div class="arch-title">Ingest</div>
+        <div class="arch-desc">Upload a CSV, paste raw text, or try a sample — no signup.</div>
+      </div>
+      <div class="card arch-card">
+        <div class="arch-num">02</div>
+        <div class="arch-title">Normalize</div>
+        <div class="arch-desc">Merges messy names like NETFLIX INDIA and NETFLIX.COM into one entity.</div>
+      </div>
+      <div class="card arch-card">
+        <div class="arch-num">03</div>
+        <div class="arch-title">Detect</div>
+        <div class="arch-desc">Flags recurring charges, price hikes ≥10%, and computes a Leak Score.</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  LeakGuard AI — Subscription &amp; Payment Leak Detector
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

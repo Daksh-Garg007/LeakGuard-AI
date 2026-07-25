@@ -1,0 +1,9 @@
+{
+  "name": "leakguard-ai",
+  "version": "1.0.0",
+  "description": "Hidden Subscription & Recurring Payment Leak Detector — InnovaHack Chapter 1, Fintech track",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  }
+}
